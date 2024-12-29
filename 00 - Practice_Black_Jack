@@ -1,1 +1,252 @@
+# Create 52 decks
+# Shuffle Cards
+# Dealer Deck
+# Player Deck
+# Bank Account
+# Bets or Folds or Draw
+# Deal 2 cards
+# Show Dealer 1 card
+# Show player 2 cards
+# Conditions 21 to be over bust
+# Play again
+
+
+import random
+
+suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
+ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
+
+values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 
+            'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':11}
+
+class Card():
+
+  def __init__(self, suit, rank):
+    self.suits = suit
+    self.ranks = rank
+    self.values = values[rank]
+
+  def __str__(self):
+    return f'{self.ranks} of {self.suits}'
+
+class Deck():
+  
+  def __init__(self):
+    
+    self.all_cards = []
+    for suit in suits:
+      for rank in ranks:
+        new_cards = Card(suit, rank)
+        self.all_cards.append(new_cards)
+
+  def shuffle(self):
+    random.shuffle(self.all_cards)
+
+  def draw_card(self):
+    return self.all_cards.pop()
+
+  def __str__(self):
+    return ',' .join([str(card) for card in self.all_cards])
+
+class Money():
+  global game_black_jack_ = True
+
+  def __init__(self, money):
+
+    self.money = money
+
+  def bet(self, amount):
+    if self.money < amount:
+      print("Insufficient Money")
+      game_black_jack = False
+    else:
+      self.money -= amount
+  
+  def win_bet(self, amount):
+    self.bet(amount)
+    self.money += (amount + amount) 
+    print(f' You only have {self.money} left')
+
+  def lose_bet(self, amount):
+    pass
+    print(f' You only have {self.money} left')
+
+  def draw_bet(self, amount):
+    self.bet(amount)
+    self.money += amount
+    print(f' You only have {self.money} left')
+
+  def check_money(self):
+    print(f' You cash out {self.money}')
+
+  def __str__ (self):
+    return f'You have ${str(self.money)}.'
+
+cards = Deck()
+cards.shuffle()
+
+player_cards = []
+player_cards_values = 0
+computer_cards = []
+computer_cards_values = 0
+game_is_on = False
+user_choosing = True
+game_black_jack = True
+
+def check_values():
+  global is_betting, computer_drawing_cards, is_choosing
+  if player_cards_values == 21 and computer_cards_values == 21:
+    print('Draw!')
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.draw_bet(bets)
+  elif player_cards_values == 21: 
+    print("Black Jack! Player Wins")
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.win_bet(bets)
+  elif computer_cards_values == 21: 
+    print("Black Jack! Computer Wins")
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.lose_bet(bets)
+  elif player_cards_values > 21:
+    print("Bust! Game Over")
+    is_betting = False
+    is_choosing = False
+    money.lose_bet(bets)
+  elif computer_cards_values > 21:
+    print("Computer Bust! You Win!")
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.win_bet(bets)
+  elif player_cards_values > computer_cards_values:
+    print('Player Wins')
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.win_bet(bets)
+  elif player_cards_values < computer_cards_values:
+    print('Computer Wins') 
+    is_betting = False
+    computer_drawing_cards = False
+    is_choosing = False
+    money.lose_bet(bets)
+
+def get_player_cards_values():
+  print("Player's cards:", ', '.join(str(card) for card in player_cards) + f' | Player Card Value: {player_cards_values}')
+
+def get_computer_cards_values():
+  print("Computer's cards:", ', '.join(str(card) for card in computer_cards) + f' | Computer Card Value: {computer_cards_values}')
+
+
+def bet_on_game():
+  global bets
+  is_betting = True
+  while is_betting:
+    bets = input("What is your bet? $: ")
+    if bets.isdigit():
+        bets = int(bets)  # Convert input to integer
+        money.bet(bets)  # Call the bet method on the Money instance
+        print(money)  # Display the updated balance
+        is_betting = False  # Exit loop after placing a valid bet
+    else: 
+      print('please enter a valid value:')
+
+def hit_stand(): 
+  global player_cards_values, computer_cards_values, is_choosing, computer_drawing_cards
+  is_choosing = True
+  while is_choosing:
+    user_option = input("Hit or Stand:").title()
+    if user_option == 'Hit':
+      player_cards.append(cards.draw_card())
+      player_cards_values += player_cards[-1].values
+      get_player_cards_values()
+      if player_cards_values > 21:
+            print("Bust! Game Over")
+            is_betting = False
+            is_choosing = False
+            money.lose_bet(bets)
+    elif user_option == 'Stand':
+      #Computer Drawing cards in a while loop
+      get_computer_cards_values()
+      is_choosing = False
+      computer_drawing_cards = True
+      while computer_drawing_cards:
+        get_computer_cards_values()
+        if computer_cards_values <= player_cards_values:
+          computer_cards.append(cards.draw_card())
+          computer_cards_values += computer_cards[-1].values
+
+        else:
+          check_values()
+        
+    else:
+      print("Please enter a (Hit/Stand)")
+
+check_account = True
+while check_account:
+  account = input('How Much Money Would you like to deposit? $')
+  if account.isdigit():
+    account = int(account)
+    money = Money(account)
+    print(money)
+    check_account = False
+  else: 
+    print('please enter a valid value')
+# bet = input('How much money would you like to bet?')
+
+while game_black_jack:
+
+  while user_choosing:
+    user_choice = input('\nWould you like to Play Jack? (Y/N)').upper()
+    if user_choice == 'Y':
+
+      player_cards = []
+      player_cards_values = 0
+      computer_cards = []
+      computer_cards_values = 0
+      
+      cards = Deck()
+      cards.shuffle()
+      user_choosing = False
+      game_is_on = True
+      
+      print('Lets Play BlackJack')
+      bet_on_game()
+          #Card Draws
+      for i in range(4):
+        if i < 2:
+          player_cards.append(cards.draw_card())
+        else:
+          computer_cards.append(cards.draw_card())
+      #User Value
+      for i in range(2):
+        player_cards_values += player_cards[i].values
+        computer_cards_values += computer_cards[i].values
+  
+      get_player_cards_values()
+      print(f'Computer First Card: {computer_cards[0]}, Card Value: {computer_cards[0].values}')
+  
+      
+      hit_stand()
+        
+     
+      
+    elif user_choice == 'N':
+      user_choosing = False
+      print('Have a nice game!')
+      game_black_jack = False
+      money.check_money()
+      
+    else:
+      print('Invalid Answer, Please enter Y/N')
+
+  user_choosing = True
+
+  # post to github
 
